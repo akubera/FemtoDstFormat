@@ -6,12 +6,12 @@
 class FemtoEvent : public FemtoDstBranch
 {
 public:
-	virtual const char* classname() const { return "FemtoEvent"; } 
+	virtual const char* classname() const { return "FemtoEvent"; }
 	FemtoEvent() {
-		mPrimaryVertex_mX1 = 0;
-		mPrimaryVertex_mX2 = 0;
-		mPrimaryVertex_mX3 = 0;
-		mWeight            = 0;
+		mPrimaryVertex_mX1 = 0.0;
+		mPrimaryVertex_mX2 = 0.0;
+		mPrimaryVertex_mX3 = 0.0;
+		mWeight            = 0.0;
 		mRunId             = 0;
 		mEventId           = 0;
 		mTriggerWord       = 0;
@@ -21,27 +21,39 @@ public:
 		mBin16             = 0;
 		mRunIndex          = 0;
 	}
-	~FemtoEvent() {}
+
+	virtual ~FemtoEvent() {}
+
+	FemtoEvent& operator=(const FemtoEvent& rhs) {
+		if (this == &rhs) {
+			return *this;
+		}
+		FemtoDstBranch::operator=(rhs);
+
+		mPrimaryVertex_mX1 = rhs.mPrimaryVertex_mX1;
+		mPrimaryVertex_mX2 = rhs.mPrimaryVertex_mX2;
+		mPrimaryVertex_mX3 = rhs.mPrimaryVertex_mX3;
+		mWeight            = rhs.mWeight;
+		mRunId             = rhs.mRunId;
+		mEventId           = rhs.mEventId;
+		mPsi2              = rhs.mPsi2;
+		mTriggerWord       = rhs.mTriggerWord;
+		mTriggerWordMtd    = rhs.mTriggerWordMtd;
+		mGRefMult          = rhs.mGRefMult;
+		mBin16             = rhs.mBin16;
+		mRunIndex          = rhs.mRunIndex;
+
+		return *this;
+	}
 
 	void copy( FemtoEvent * that ){
-		this->mPrimaryVertex_mX1 = that->mPrimaryVertex_mX1;
-		this->mPrimaryVertex_mX2 = that->mPrimaryVertex_mX2;
-		this->mPrimaryVertex_mX3 = that->mPrimaryVertex_mX3;
-		this->mWeight            = that->mWeight;
-		this->mRunId             = that->mRunId;
-		this->mEventId           = that->mEventId;
-		this->mPsi2              = that->mPsi2;
-		this->mTriggerWord       = that->mTriggerWord;
-		this->mTriggerWordMtd    = that->mTriggerWordMtd;
-		this->mGRefMult          = that->mGRefMult;
-		this->mBin16             = that->mBin16;
-		this->mRunIndex          = that->mRunIndex;
+		*this = *that;
 	}
 
 	float psi() { return mPsi2 / 10000.0; }
 
 	int year() const { return (mRunId / 1000000) - 1 + 2000; }
-	
+
 	void vertex( Float_t x, Float_t y, Float_t z ){
 		this->mPrimaryVertex_mX1 = x;
 		this->mPrimaryVertex_mX2 = y;
@@ -80,67 +92,67 @@ public:
 	UShort_t 	mRunIndex;				// the run index
 
 	virtual bool isDiMuon() const {
-		if(year()==2014){ 
+		if(year()==2014){
 			for(Int_t i=0; i<8; i++) {
 				if(mTriggerWordMtd & (1<<i)) return true;
 			}
-		} else if(year()==2013) { 
+		} else if(year()==2013) {
 			for(Int_t i=0; i<2; i++) {
 				if(mTriggerWordMtd & (1<<i)) return true;
 			}
-		} else if(year()==2015){ 
+		} else if(year()==2015){
 			for(Int_t i=0; i<5; i++) {
-				if(mTriggerWordMtd & (1<<i)) 
+				if(mTriggerWordMtd & (1<<i))
 					return kTRUE;
 			}
 		}
 		return false;
 	}
 
-	virtual bool isDiMuonHFT() const { 
-		if(year()==2014){ 
+	virtual bool isDiMuonHFT() const {
+		if(year()==2014){
 			for(Int_t i=5; i<8; i++){
 				if(mTriggerWordMtd & (1<<i)) return true;
 			}
 		}
 		return false;
-	} 
+	}
 
-	virtual bool isSingleMuon() const { 
-		if(year()==2014){ 
+	virtual bool isSingleMuon() const {
+		if(year()==2014){
 			for(Int_t i=13; i<18; i++){
 				if(mTriggerWordMtd & (1<<i)) return true;
 			}
-		} else if(year()==2013) { 
+		} else if(year()==2013) {
 			for(Int_t i=5; i<7; i++) {
 				if(mTriggerWordMtd & (1<<i)) return true;
 			}
-		} else if(year()==2015) { 
+		} else if(year()==2015) {
 			for(Int_t i=10; i<15; i++) {
-				if(mTriggerWordMtd & (1<<i)) 
+				if(mTriggerWordMtd & (1<<i))
 					return kTRUE;
 			}
 		}
 		return false;
 	}
 
-	virtual bool isEMuon() const { 
-		if(year()==2014){ 
+	virtual bool isEMuon() const {
+		if(year()==2014){
 			for(Int_t i=8; i<13; i++) {
 				if(mTriggerWordMtd & (1<<i)) return true;
 			}
-		} else if(year()==2013) { 
+		} else if(year()==2013) {
 			for(Int_t i=2; i<5; i++) {
 				if(mTriggerWordMtd & (1<<i)) return true;
 			}
-		} else if( year()==2015) { 
+		} else if( year()==2015) {
 			for(Int_t i=5; i<10; i++) {
-				if(mTriggerWordMtd & (1<<i)) 
-					return kTRUE; 
+				if(mTriggerWordMtd & (1<<i))
+					return kTRUE;
 			}
 		}
 		return false;
-	} 
+	}
 
 	virtual bool isMtdTrigger( std::string trigger ){
 		if ( "all" == trigger )
