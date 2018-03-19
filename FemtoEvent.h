@@ -2,6 +2,7 @@
 #define FEMTO_EVENT_H
 
 #include "FemtoDstBranch.h"
+#include <algorithm>
 
 class FemtoEvent : public FemtoDstBranch
 {
@@ -92,79 +93,65 @@ public:
 	UShort_t 	mRunIndex;				// the run index
 
 	virtual bool isDiMuon() const {
-		if(year()==2014){
-			for(Int_t i=0; i<8; i++) {
-				if(mTriggerWordMtd & (1<<i)) return true;
-			}
-		} else if(year()==2013) {
-			for(Int_t i=0; i<2; i++) {
-				if(mTriggerWordMtd & (1<<i)) return true;
-			}
-		} else if(year()==2015){
-			for(Int_t i=0; i<5; i++) {
-				if(mTriggerWordMtd & (1<<i))
-					return kTRUE;
-			}
+
+		switch (year()) {
+		case 2014:
+			return mTriggerWordMtd & 0xFF; // first 8 bits
+		case 2013:
+			return mTriggerWordMtd & 0x03; // first 2 bits
+		case 2015:
+			return mTriggerWordMtd & 0x1F; // first 5 bits [0,4]
 		}
 		return false;
 	}
 
 	virtual bool isDiMuonHFT() const {
-		if(year()==2014){
-			for(Int_t i=5; i<8; i++){
-				if(mTriggerWordMtd & (1<<i)) return true;
-			}
+		switch (year()) {
+		case 2014:
+			return mTriggerWordMtd & 0xE0; // bits [5,8)
 		}
 		return false;
 	}
 
 	virtual bool isSingleMuon() const {
-		if(year()==2014){
-			for(Int_t i=13; i<18; i++){
-				if(mTriggerWordMtd & (1<<i)) return true;
-			}
-		} else if(year()==2013) {
-			for(Int_t i=5; i<7; i++) {
-				if(mTriggerWordMtd & (1<<i)) return true;
-			}
-		} else if(year()==2015) {
-			for(Int_t i=10; i<15; i++) {
-				if(mTriggerWordMtd & (1<<i))
-					return kTRUE;
-			}
+		switch (year()) {
+		case 2014:
+			return mTriggerWordMtd & 0x3E000; // bits [13,18)
+		case 2013:
+			return mTriggerWordMtd & 0x00060; // bits [5,7)
+		case 2015:
+			return mTriggerWordMtd & 0x07C00; // bits [10,15)
 		}
 		return false;
 	}
 
 	virtual bool isEMuon() const {
-		if(year()==2014){
-			for(Int_t i=8; i<13; i++) {
-				if(mTriggerWordMtd & (1<<i)) return true;
-			}
-		} else if(year()==2013) {
-			for(Int_t i=2; i<5; i++) {
-				if(mTriggerWordMtd & (1<<i)) return true;
-			}
-		} else if( year()==2015) {
-			for(Int_t i=5; i<10; i++) {
-				if(mTriggerWordMtd & (1<<i))
-					return kTRUE;
-			}
+		switch (year()) {
+		case 2014:
+			return mTriggerWordMtd & 0x1F00; // bits [8,13)
+		case 2013:
+			return mTriggerWordMtd & 0x001C; // bits [2, 5)
+		case 2015:
+			return mTriggerWordMtd & 0x03E0; // bits [5, 10)
 		}
 		return false;
 	}
 
 	virtual bool isMtdTrigger( std::string trigger ){
+                // make trigger lowercase
+		std::transform(trigger.begin(), trigger.end(), trigger.begin(), ::tolower);
+
 		if ( "all" == trigger )
 			return true;
-		if ( "dimuon" == trigger || "DiMuon" == trigger || "DIMUON" == trigger || "Dimuon" == trigger )
+		else if ( "dimuon" == trigger)
 			return isDiMuon();
-		if ( "singlemuon" == trigger || "SINGLEMUON" == trigger || "SingleMuon" == trigger || "singlemu" == trigger )
+		else if ( "singlemuon" == trigger)
 			return isSingleMuon();
-		if ( "dimuonhft" == trigger )
+		else if ( "dimuonhft" == trigger )
 			return isDiMuonHFT();
-		if ( "emu" == trigger )
+		else if ( "emu" == trigger )
 			return isEMuon();
+
 		return false;
 	}
 
